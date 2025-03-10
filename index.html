@@ -24,48 +24,48 @@
     </div>
 
     <script>
-        let ticketCount = localStorage.getItem('ticketCount') || 0;
-        document.getElementById("ticketCount").innerText = ticketCount;
+        const API_URL = "あなたのGASのURL";
 
-        function addTicket() {
-            ticketCount++;
-            localStorage.setItem('ticketCount', ticketCount);
-            document.getElementById("ticketCount").innerText = ticketCount;
-        }
+async function fetchTicketData() {
+    let response = await fetch(API_URL);
+    let data = await response.json();
+    
+    document.getElementById("ticketCount").innerText = data.ticketCount;
+    
+    let memoList = document.getElementById("memoList");
+    memoList.innerHTML = "";
+    data.memos.forEach(memo => {
+        let li = document.createElement("li");
+        li.textContent = memo;
+        memoList.appendChild(li);
+    });
+}
 
-        function removeTicket() {
-            if (ticketCount > 0) {
-                ticketCount--;
-                localStorage.setItem('ticketCount', ticketCount);
-                document.getElementById("ticketCount").innerText = ticketCount;
-            }
-        }
+async function updateTicket(change) {
+    let count = parseInt(document.getElementById("ticketCount").innerText) + change;
+    await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ type: "ticket", count: count }),
+        headers: { "Content-Type": "application/json" }
+    });
+    fetchTicketData();
+}
 
-        function addMemo() {
-            let memoText = document.getElementById("memoInput").value;
-            if (memoText.trim() !== "") {
-                let memoList = document.getElementById("memoList");
-                let li = document.createElement("li");
-                li.textContent = memoText;
-                memoList.appendChild(li);
+async function addMemo() {
+    let memoText = document.getElementById("memoInput").value;
+    if (memoText.trim() !== "") {
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ type: "memo", text: memoText }),
+            headers: { "Content-Type": "application/json" }
+        });
+        fetchTicketData();
+        document.getElementById("memoInput").value = "";
+    }
+}
 
-                let savedMemos = JSON.parse(localStorage.getItem("memos")) || [];
-                savedMemos.push(memoText);
-                localStorage.setItem("memos", JSON.stringify(savedMemos));
-
-                document.getElementById("memoInput").value = "";
-            }
-        }
-
-        window.onload = function() {
-            let savedMemos = JSON.parse(localStorage.getItem("memos")) || [];
-            let memoList = document.getElementById("memoList");
-            savedMemos.forEach(memo => {
-                let li = document.createElement("li");
-                li.textContent = memo;
-                memoList.appendChild(li);
-            });
-        };
+// 初回データ取得
+fetchTicketData();
     </script>
 </body>
 </html>
