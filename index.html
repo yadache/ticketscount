@@ -3,10 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages Test</title>
+    <title>チケット管理</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        button { margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <h1>GitHub Pages のテスト</h1>
-    <p>このページが表示されれば成功です！</p>
+    <div class="container">
+        <h1>チケット管理</h1>
+        <p>現在のチケット数: <span id="ticketCount">0</span></p>
+        <button onclick="addTicket()">チケットを追加</button>
+        <button onclick="removeTicket()">チケットを減らす</button>
+
+        <h2>メモ</h2>
+        <input type="text" id="memoInput" placeholder="メモを入力">
+        <button onclick="addMemo()">メモを追加</button>
+        <ul id="memoList"></ul>
+    </div>
+
+    <script>
+        let ticketCount = localStorage.getItem('ticketCount') || 0;
+        document.getElementById("ticketCount").innerText = ticketCount;
+
+        function addTicket() {
+            ticketCount++;
+            localStorage.setItem('ticketCount', ticketCount);
+            document.getElementById("ticketCount").innerText = ticketCount;
+        }
+
+        function removeTicket() {
+            if (ticketCount > 0) {
+                ticketCount--;
+                localStorage.setItem('ticketCount', ticketCount);
+                document.getElementById("ticketCount").innerText = ticketCount;
+            }
+        }
+
+        function addMemo() {
+            let memoText = document.getElementById("memoInput").value;
+            if (memoText.trim() !== "") {
+                let memoList = document.getElementById("memoList");
+                let li = document.createElement("li");
+                li.textContent = memoText;
+                memoList.appendChild(li);
+
+                let savedMemos = JSON.parse(localStorage.getItem("memos")) || [];
+                savedMemos.push(memoText);
+                localStorage.setItem("memos", JSON.stringify(savedMemos));
+
+                document.getElementById("memoInput").value = "";
+            }
+        }
+
+        window.onload = function() {
+            let savedMemos = JSON.parse(localStorage.getItem("memos")) || [];
+            let memoList = document.getElementById("memoList");
+            savedMemos.forEach(memo => {
+                let li = document.createElement("li");
+                li.textContent = memo;
+                memoList.appendChild(li);
+            });
+        };
+    </script>
 </body>
 </html>
